@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCHWAK-IT CONSULTANCY — We Don't Consult. We Solve.</title>
+  <meta name="description" content="Elite tech consulting in Cybersecurity, Python, Linux, Web Development, AI/ML, Kubernetes, and Data Science. Powered by Claude AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+  /* ═══ RESET & TOKENS ═══════════════════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #050608;
+    --bg2:      #0a0c10;
+    --bg3:      #0f1218;
+    --surface:  #141820;
+    --border:   #1e2430;
+    --border2:  #2a3040;
+    --cyan:     #00e5ff;
+    --cyan2:    #33eaff;
+    --orange:   #ff6b00;
+    --red:      #ff2d55;
+    --green:    #00ff88;
+    --purple:   #bf5fff;
+    --blue:     #326ce5;
+    --yellow:   #ffcc00;
+    --text:     #e8eaf0;
+    --text2:    #8892a4;
+    --text3:    #4a5568;
+    --fh: 'Bebas Neue', sans-serif;
+    --fm: 'Space Mono', monospace;
+    --fb: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--fb); overflow-x: hidden; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan2); border-radius: 2px; }
+
+  h1, h2, h3 { font-family: var(--fh); line-height: 1; letter-spacing: 0.02em; }
+
+  /* ═══ NAV ═══════════════════════════════════════════════════════════════════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 2.5rem;
+    background: rgba(5,6,8,0.88); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: var(--fh); font-size: 1.35rem; letter-spacing: 0.12em; color: var(--cyan); text-decoration: none; }
+  .nav-logo span { color: var(--text2); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { color: var(--text2); text-decoration: none; font-family: var(--fm); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-cta { background: var(--cyan); color: var(--bg); font-family: var(--fm); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; padding: 0.55rem 1.2rem; cursor: pointer; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--cyan2); }
+
+  /* ═══ HERO ══════════════════════════════════════════════════════════════════ */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 2.5rem 5rem; position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: linear-gradient(rgba(0,229,255,0.04) 1px,transparent 1px), linear-gradient(90deg,rgba(0,229,255,0.04) 1px,transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+  .hero-glow {
+    position: absolute; width: 900px; height: 900px; top: -200px; right: -300px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    animation: glowFloat 12s ease-in-out infinite; z-index: 0;
+  }
+  @keyframes gridPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes glowFloat { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px,30px); } }
+  @keyframes titleIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hero-content { position: relative; z-index: 1; max-width: 1100px; }
+  .hero-eyebrow { font-family: var(--fm); font-size: 0.7rem; letter-spacing: 0.25em; color: var(--cyan); text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: var(--cyan); }
+  .hero-title { font-family: var(--fh); font-size: clamp(4.5rem, 13vw, 13rem); letter-spacing: -0.01em; line-height: 0.88; animation: titleIn 1s cubic-bezier(0.16,1,0.3,1) both; }
+  .hero-title .l2 { color: var(--cyan); display: block; }
+  .hero-title .l3 { color: transparent; -webkit-text-stroke: 1px rgba(232,234,240,0.22); display: block; }
+
+  .hero-sub { margin-top: 2.5rem; display: flex; align-items: flex-start; gap: 3rem; flex-wrap: wrap; }
+  .hero-desc { max-width: 420px; color: var(--text2); font-size: 0.95rem; line-height: 1.75; }
+  .hero-desc strong { color: var(--text); }
+  .hero-stats { display: flex; gap: 2.5rem; padding-top: 0.2rem; }
+  .stat-num { font-family: var(--fh); font-size: 2.8rem; color: var(--cyan); line-height: 1; }
+  .stat-lbl { font-family: var(--fm); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-top: 0.3rem; }
+
+  .hero-actions { margin-top: 3rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { background: var(--cyan); color: var(--bg); font-family: var(--fm); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; padding: 0.9rem 2rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+  .btn-primary:hover { background: var(--cyan2); transform: translateY(-2px); }
+  .btn-ghost { background: transparent; color: var(--text2); font-family: var(--fm); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--border2); padding: 0.9rem 2rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ═══ TICKER ════════════════════════════════════════════════════════════════ */
+  .ticker { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; padding: 0.65rem 0; background: var(--bg2); }
+  .ticker-inner { display: flex; gap: 4rem; animation: tick 30s linear infinite; white-space: nowrap; }
+  .ticker-inner:hover { animation-play-state: paused; }
+  @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .ti { font-family: var(--fm); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); }
+  .ti .dot { color: var(--cyan); margin-right: 0.4rem; }
+
+  /* ═══ LAYOUT HELPERS ════════════════════════════════════════════════════════ */
+  section { position: relative; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 2.5rem; }
+  .section-label { font-family: var(--fm); font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 1rem; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-title { font-family: var(--fh); font-size: clamp(3rem, 6vw, 6rem); line-height: 0.9; margin-bottom: 3.5rem; }
+
+  .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .fade-up.vis { opacity: 1; transform: translateY(0); }
+  .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+  /* ═══ SERVICES ══════════════════════════════════════════════════════════════ */
+  .services { padding: 8rem 0; background: var(--bg); border-top: 1px solid var(--border); }
+  .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+  .svc-card { background: var(--bg2); padding: 2.5rem; position: relative; overflow: hidden; transition: background 0.3s; }
+  .svc-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--cc, var(--cyan)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+  .svc-card:hover { background: var(--surface); }
+  .svc-card:hover::before { transform: scaleX(1); }
+  .svc-num { font-family: var(--fh); font-size: 4.5rem; color: var(--border2); position: absolute; top: 1.5rem; right: 2rem; line-height: 1; transition: color 0.3s, opacity 0.3s; }
+  .svc-card:hover .svc-num { color: var(--cc, var(--cyan)); opacity: 0.25; }
+  .svc-icon { width: 44px; height: 44px; margin-bottom: 1.5rem; color: var(--cc, var(--cyan)); }
+  .svc-name { font-family: var(--fh); font-size: 2.2rem; margin-bottom: 0.9rem; line-height: 1; }
+  .svc-desc { color: var(--text2); font-size: 0.88rem; line-height: 1.7; }
+  .svc-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.4rem; }
+  .tag { font-family: var(--fm); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.6rem; border: 1px solid var(--border2); color: var(--text3); transition: all 0.2s; }
+  .svc-card:hover .tag { border-color: var(--cc, var(--cyan)); color: var(--cc, var(--cyan)); }
+
+  .cc-cyber   { --cc: #ff2d55; } .cc-python { --cc: #00e5ff; }
+  .cc-linux   { --cc: #ff6b00; } .cc-web    { --cc: #00ff88; }
+  .cc-ai      { --cc: #bf5fff; } .cc-k8s    { --cc: #326ce5; }
+  .cc-data    { --cc: #ffcc00; }
+
+  /* ═══ PRICING ═══════════════════════════════════════════════════════════════ */
+  .pricing { padding: 8rem 0; background: var(--bg3); border-top: 1px solid var(--border); }
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); margin-top: 3.5rem; }
+
+  .plan { background: var(--bg2); padding: 2.5rem; display: flex; flex-direction: column; position: relative; transition: background 0.3s; }
+  .plan:hover { background: var(--surface); }
+  .plan.featured { background: var(--surface); outline: 1px solid var(--cyan); outline-offset: -1px; }
+
+  .plan-badge { font-family: var(--fm); font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--cyan); color: var(--bg); padding: 0.2rem 0.6rem; display: inline-block; margin-bottom: 1.2rem; width: fit-content; }
+  .plan-name { font-family: var(--fh); font-size: 2.5rem; line-height: 1; margin-bottom: 0.4rem; }
+  .plan-price { display: flex; align-items: baseline; gap: 0.2rem; margin-bottom: 0.4rem; }
+  .plan-curr { font-family: var(--fm); font-size: 1rem; color: var(--text2); }
+  .plan-amt  { font-family: var(--fh); font-size: 4.2rem; color: var(--cyan); line-height: 1; }
+  .plan-per  { font-family: var(--fm); font-size: 0.68rem; color: var(--text3); }
+  .plan-sub  { font-family: var(--fm); font-size: 0.7rem; color: var(--text3); letter-spacing: 0.04em; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+
+  .plan-feats { flex: 1; list-style: none; margin-bottom: 2rem; }
+  .plan-feats li { display: flex; align-items: flex-start; gap: 0.7rem; font-size: 0.86rem; color: var(--text2); padding: 0.42rem 0; border-bottom: 1px solid rgba(30,36,48,0.6); line-height: 1.4; }
+  .plan-feats li::before { content: '→'; color: var(--cyan); font-family: var(--fm); font-size: 0.72rem; flex-shrink: 0; padding-top: 0.05rem; }
+  .plan-feats li.off { color: var(--text3); }
+  .plan-feats li.off::before { content: '—'; color: var(--text3); }
+
+  .plan-btn { width: 100%; padding: 0.9rem; font-family: var(--fm); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border: none; }
+  .plan-btn.solid { background: var(--cyan); color: var(--bg); }
+  .plan-btn.solid:hover { background: var(--cyan2); transform: translateY(-2px); }
+  .plan-btn.outline { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .plan-btn.outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .pricing-foot { text-align: center; margin-top: 2rem; }
+
+  /* ═══ PHILOSOPHY ════════════════════════════════════════════════════════════ */
+  .philosophy { padding: 8rem 0; background: var(--bg2); border-top: 1px solid var(--border); }
+  .phil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+  .phil-quote { font-family: var(--fh); font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1.05; }
+  .phil-quote em { color: var(--cyan); font-style: normal; }
+  .phil-attr { margin-top: 1.5rem; font-family: var(--fm); font-size: 0.68rem; color: var(--text3); letter-spacing: 0.12em; }
+  .phil-body { color: var(--text2); }
+  .phil-body p { font-size: 0.93rem; line-height: 1.8; margin-bottom: 1.2rem; }
+  .phil-body strong { color: var(--cyan); }
+
+  /* ═══ CONSULT (CHAT) ════════════════════════════════════════════════════════ */
+  .consult-section { padding: 8rem 0; background: var(--bg); border-top: 1px solid var(--border); }
+  .consult-wrap { display: grid; grid-template-columns: 1fr 1.25fr; gap: 5rem; align-items: start; }
+  .consult-desc { color: var(--text2); font-size: 0.93rem; line-height: 1.8; margin-bottom: 2rem; }
+  .dom-pills { display: flex; flex-direction: column; gap: 0.7rem; }
+  .dom-pill { display: flex; align-items: center; gap: 0.9rem; font-family: var(--fm); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+  .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--pc, var(--cyan)); box-shadow: 0 0 7px var(--pc, var(--cyan)); }
+
+  .chat-widget { background: var(--bg2); border: 1px solid var(--border); display: flex; flex-direction: column; height: 620px; }
+  .chat-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .chat-head-l { display: flex; align-items: center; gap: 0.7rem; }
+  .chat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 7px var(--green); animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .chat-title-lbl { font-family: var(--fm); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+  .chat-badge { font-family: var(--fm); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid rgba(0,229,255,0.2); padding: 0.2rem 0.55rem; }
+
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 1.4rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .chat-msgs::-webkit-scrollbar { width: 3px; }
+  .chat-msgs::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .msg { max-width: 88%; display: flex; flex-direction: column; gap: 0.3rem; }
+  .msg.user { align-self: flex-end; }
+  .msg.assistant { align-self: flex-start; }
+  .msg-lbl { font-family: var(--fm); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+  .msg.user .msg-lbl { text-align: right; }
+  .msg-bub { padding: 0.8rem 1rem; font-size: 0.86rem; line-height: 1.65; }
+  .msg.user .msg-bub { background: var(--cyan); color: var(--bg); font-weight: 500; }
+  .msg.assistant .msg-bub { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .msg.assistant .msg-bub code { background: rgba(0,229,255,0.1); color: var(--cyan); padding: 0.1em 0.3em; font-size: 0.8em; }
+  .msg.assistant .msg-bub pre { background: var(--bg3); border: 1px solid var(--border); padding: 0.7rem; margin: 0.6rem 0; overflow-x: auto; font-size: 0.76rem; color: var(--green); }
+  .msg-dom { font-family: var(--fm); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+
+  .typing-dots { display: flex; gap: 4px; padding: 0.8rem 1rem; background: var(--surface); border: 1px solid var(--border); width: fit-content; }
+  .td { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); animation: bounce 1.2s ease-in-out infinite; }
+  .td:nth-child(2) { animation-delay: 0.2s; } .td:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+  .sugg-qs { padding: 0 1.4rem 0.9rem; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .sq { font-family: var(--fm); font-size: 0.6rem; letter-spacing: 0.05em; background: transparent; border: 1px solid var(--border2); color: var(--text3); padding: 0.3rem 0.7rem; cursor: pointer; transition: all 0.2s; }
+  .sq:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .chat-input-row { padding: 0.9rem 1.4rem; border-top: 1px solid var(--border); display: flex; gap: 0.7rem; }
+  .chat-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--fb); font-size: 0.86rem; padding: 0.75rem 0.9rem; outline: none; resize: none; max-height: 110px; line-height: 1.5; transition: border-color 0.2s; }
+  .chat-input::placeholder { color: var(--text3); }
+  .chat-input:focus { border-color: var(--cyan); }
+  .chat-send { background: var(--cyan); color: var(--bg); border: none; padding: 0.75rem 1.1rem; cursor: pointer; font-family: var(--fm); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: background 0.2s; white-space: nowrap; align-self: flex-end; }
+  .chat-send:hover:not(:disabled) { background: var(--cyan2); }
+  .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ═══ MODAL ══════════════════════════════════════════════════════════════════ */
+  .overlay { position: fixed; inset: 0; z-index: 500; background: rgba(5,6,8,0.92); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--bg2); border: 1px solid var(--border2); width: 100%; max-width: 480px; margin: 1rem; transform: translateY(20px); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-head { padding: 1.4rem 1.8rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
+  .modal-plan-name { font-family: var(--fh); font-size: 1.8rem; line-height: 1; }
+  .modal-plan-badge { font-family: var(--fm); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); border: 1px solid rgba(0,229,255,0.25); padding: 0.22rem 0.65rem; margin-top: 0.4rem; display: inline-block; }
+  .modal-x { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 1.2rem; line-height: 1; transition: color 0.2s; }
+  .modal-x:hover { color: var(--text); }
+  .modal-body { padding: 1.8rem; }
+  .modal-summary { background: var(--bg3); border: 1px solid var(--border); padding: 0.9rem 1.1rem; margin-bottom: 1.3rem; font-family: var(--fm); font-size: 0.7rem; color: var(--text2); letter-spacing: 0.04em; line-height: 1.8; }
+  .modal-summary strong { color: var(--cyan); }
+  .fgroup { margin-bottom: 1.1rem; }
+  .flabel { display: block; font-family: var(--fm); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.4rem; }
+  .finput { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--fb); font-size: 0.88rem; padding: 0.72rem 0.9rem; outline: none; transition: border-color 0.2s; }
+  .finput:focus { border-color: var(--cyan); }
+  .finput::placeholder { color: var(--text3); }
+  .modal-err { color: var(--red); font-family: var(--fm); font-size: 0.65rem; letter-spacing: 0.05em; margin-bottom: 1rem; padding: 0.55rem 0.8rem; border: 1px solid rgba(255,45,85,0.3); background: rgba(255,45,85,0.05); display: none; }
+  .modal-submit { width: 100%; background: var(--cyan); color: var(--bg); border: none; padding: 0.95rem; font-family: var(--fm); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .modal-submit:hover:not(:disabled) { background: var(--cyan2); }
+  .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .modal-note { margin-top: 0.9rem; text-align: center; font-family: var(--fm); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.05em; line-height: 1.6; }
+  .modal-success { padding: 2rem; text-align: center; }
+  .modal-success-icon { font-size: 2.4rem; margin-bottom: 0.9rem; }
+  .modal-success h3 { font-family: var(--fh); font-size: 2rem; color: var(--green); margin-bottom: 0.75rem; }
+  .modal-success p { color: var(--text2); font-size: 0.88rem; line-height: 1.75; }
+  .modal-success .plan-btn { margin-top: 1.5rem; }
+
+  /* ═══ FOOTER ════════════════════════════════════════════════════════════════ */
+  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4rem 0 2rem; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+  .footer-logo { font-family: var(--fh); font-size: 1.8rem; letter-spacing: 0.1em; color: var(--cyan); display: block; margin-bottom: 0.9rem; }
+  .footer-tag { color: var(--text3); font-size: 0.86rem; max-width: 280px; line-height: 1.6; }
+  .footer-col h4 { font-family: var(--fm); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 1.1rem; }
+  .footer-col a { display: block; color: var(--text2); text-decoration: none; font-size: 0.86rem; margin-bottom: 0.55rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--cyan); }
+  .footer-bot { padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-family: var(--fm); font-size: 0.62rem; letter-spacing: 0.08em; color: var(--text3); }
+  .footer-powered { font-family: var(--fm); font-size: 0.62rem; color: var(--text3); letter-spacing: 0.08em; }
+  .footer-powered span { color: var(--cyan); }
+
+  /* ═══ RESPONSIVE ════════════════════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .svc-grid   { grid-template-columns: repeat(2, 1fr); }
+    .price-grid { grid-template-columns: 1fr; }
+    .phil-grid  { grid-template-columns: 1fr; gap: 3rem; }
+    .consult-wrap { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 0.9rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 0 1.5rem 4rem; }
+    .container { padding: 0 1.5rem; }
+    .svc-grid { grid-template-columns: 1fr; }
+    .hero-sub { flex-direction: column; gap: 2rem; }
+    .footer-top { grid-template-columns: 1fr; }
+  }
+
+  #cg { position: fixed; pointer-events: none; z-index: 9999; width: 280px; height: 280px; background: radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%); transform: translate(-50%,-50%); }
+  </style>
+</head>
+<body>
+
+<div id="cg"></div>
+
+<!-- ════════════════════ NAV ════════════════════ -->
+<nav>
+  <a href="#" class="nav-logo">SCHWAK</a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#philosophy">Philosophy</a>
+    <a href="#consult">Consult</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('consult').scrollIntoView({behavior:'smooth'})">
+    Start Consulting →
+  </button>
+</nav>
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">AI-Powered Tech Consultancy · Est. 2024</div>
+    <h1 class="hero-title">
+      <span class="l2">AI</span><span class="l3">CONSULTANCY</span>
+    </h1>
+    <div class="hero-sub">
+      <div class="hero-desc">
+        <strong>We don't theorize. We execute.</strong><br/><br/>
+        Elite consulting in Cybersecurity, Python, Linux, Web Development,
+        AI/ML, Kubernetes, and Data Science — delivered by our always-on AI
+        consultant. First principles. Zero fluff.
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">7</div>
+          <div class="stat-lbl">Core Domains</div>
+        </div>
+        <div>
+          <div class="stat-num">24/7</div>
+          <div class="stat-lbl">AI Availability</div>
+        </div>
+        <div>
+          <div class="stat-num">∞</div>
+          <div class="stat-lbl">Zero Fluff</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <a href="#consult" class="btn-primary">Consult the AI →</a>
+      <a href="#pricing" class="btn-ghost">View Plans</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ TICKER ════════════════════ -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ti"><span class="dot">▸</span>CYBERSECURITY</span>
+    <span class="ti"><span class="dot">▸</span>PYTHON DEVELOPMENT</span>
+    <span class="ti"><span class="dot">▸</span>LINUX SYSTEMS</span>
+    <span class="ti"><span class="dot">▸</span>WEB APPLICATIONS</span>
+    <span class="ti"><span class="dot">▸</span>ARTIFICIAL INTELLIGENCE</span>
+    <span class="ti"><span class="dot">▸</span>KUBERNETES &amp; CONTAINERS</span>
+    <span class="ti"><span class="dot">▸</span>DATA SCIENCE</span>
+    <span class="ti"><span class="dot">▸</span>PENETRATION TESTING</span>
+    <span class="ti"><span class="dot">▸</span>ML PIPELINES</span>
+    <span class="ti"><span class="dot">▸</span>CLUSTER ORCHESTRATION</span>
+    <span class="ti"><span class="dot">▸</span>SYSTEM HARDENING</span>
+    <span class="ti"><span class="dot">▸</span>CYBERSECURITY</span>
+    <span class="ti"><span class="dot">▸</span>PYTHON DEVELOPMENT</span>
+    <span class="ti"><span class="dot">▸</span>LINUX SYSTEMS</span>
+    <span class="ti"><span class="dot">▸</span>WEB APPLICATIONS</span>
+    <span class="ti"><span class="dot">▸</span>ARTIFICIAL INTELLIGENCE</span>
+    <span class="ti"><span class="dot">▸</span>KUBERNETES &amp; CONTAINERS</span>
+    <span class="ti"><span class="dot">▸</span>DATA SCIENCE</span>
+    <span class="ti"><span class="dot">▸</span>PENETRATION TESTING</span>
+    <span class="ti"><span class="dot">▸</span>ML PIPELINES</span>
+    <span class="ti"><span class="dot">▸</span>CLUSTER ORCHESTRATION</span>
+    <span class="ti"><span class="dot">▸</span>SYSTEM HARDENING</span>
+  </div>
+</div>
+
+<!-- ════════════════════ SERVICES ════════════════════ -->
+<section class="services" id="services">
+  <div class="container">
+    <div class="section-label fade-up">What we do</div>
+    <h2 class="section-title fade-up d1">OUR<br/>DOMAINS</h2>
+    <div class="svc-grid">
+
+      <div class="svc-card cc-cyber fade-up d1">
+        <div class="svc-num">01</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M24 4L6 12v16c0 9 7.5 17.5 18 20 10.5-2.5 18-11 18-20V12L24 4z"/><path d="M16 24l5 5 11-11"/></svg>
+        <div class="svc-name">CYBER<br/>SECURITY</div>
+        <p class="svc-desc">Zero-trust architecture, penetration testing, incident response, SIEM tuning, and compliance. We find the holes before the attackers do.</p>
+        <div class="svc-tags"><span class="tag">Pentesting</span><span class="tag">SOC Ops</span><span class="tag">SIEM</span><span class="tag">Zero Trust</span><span class="tag">CVE Analysis</span></div>
+      </div>
+
+      <div class="svc-card cc-python fade-up d2">
+        <div class="svc-num">02</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="12" width="40" height="28" rx="2"/><path d="M4 20h40"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/><circle cx="18" cy="16" r="1.5" fill="currentColor"/><path d="M14 30l4-4-4-4M22 30h8"/></svg>
+        <div class="svc-name">PYTHON<br/>ENGINEERING</div>
+        <p class="svc-desc">Production-grade Python — FastAPI services, automation pipelines, security tooling, tested, packaged, and engineered to survive contact with reality.</p>
+        <div class="svc-tags"><span class="tag">FastAPI</span><span class="tag">Django</span><span class="tag">Automation</span><span class="tag">Testing</span><span class="tag">Packaging</span></div>
+      </div>
+
+      <div class="svc-card cc-linux fade-up d3">
+        <div class="svc-num">03</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="8" width="40" height="28" rx="2"/><path d="M16 44h16M24 36v8"/><path d="M12 20l4 4-4 4M20 28h8"/></svg>
+        <div class="svc-name">LINUX<br/>SYSTEMS</div>
+        <p class="svc-desc">Hardening, kernel tuning, bash automation, systemd, networking, and storage. CLI mastery that most people only pretend to have.</p>
+        <div class="svc-tags"><span class="tag">Hardening</span><span class="tag">Bash</span><span class="tag">Systemd</span><span class="tag">Networking</span><span class="tag">Kernel Tuning</span></div>
+      </div>
+
+      <div class="svc-card cc-web fade-up d1">
+        <div class="svc-num">04</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="20"/><path d="M4 24h40"/><path d="M24 4c-6 8-6 28 0 40M24 4c6 8 6 28 0 40"/></svg>
+        <div class="svc-name">WEB APP<br/>DEVELOPMENT</div>
+        <p class="svc-desc">React frontends, Python/Node backends, REST & GraphQL APIs. Security baked in, not bolted on. We ship products people can rely on.</p>
+        <div class="svc-tags"><span class="tag">React</span><span class="tag">Next.js</span><span class="tag">REST APIs</span><span class="tag">GraphQL</span><span class="tag">Auth</span></div>
+      </div>
+
+      <div class="svc-card cc-ai fade-up d2">
+        <div class="svc-num">05</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="6"/><circle cx="24" cy="8" r="3"/><circle cx="24" cy="40" r="3"/><circle cx="8" cy="24" r="3"/><circle cx="40" cy="24" r="3"/><circle cx="11" cy="11" r="3"/><circle cx="37" cy="37" r="3"/><circle cx="37" cy="11" r="3"/><circle cx="11" cy="37" r="3"/><line x1="24" y1="18" x2="24" y2="11"/><line x1="24" y1="30" x2="24" y2="37"/><line x1="18" y1="24" x2="11" y2="24"/><line x1="30" y1="24" x2="37" y2="24"/></svg>
+        <div class="svc-name">ARTIFICIAL<br/>INTELLIGENCE</div>
+        <p class="svc-desc">LLM integration, RAG pipelines, fine-tuning, agent frameworks, and production ML inference. Not demo notebooks — shipped products.</p>
+        <div class="svc-tags"><span class="tag">LLMs</span><span class="tag">RAG</span><span class="tag">Fine-Tuning</span><span class="tag">Agents</span><span class="tag">PyTorch</span></div>
+      </div>
+
+      <div class="svc-card cc-k8s fade-up d3">
+        <div class="svc-num">06</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><polygon points="24,4 44,14 44,34 24,44 4,34 4,14"/><circle cx="24" cy="24" r="5"/><line x1="24" y1="4" x2="24" y2="19"/><line x1="24" y1="29" x2="24" y2="44"/><line x1="44" y1="14" x2="31" y2="21"/><line x1="17" y1="27" x2="4" y2="34"/><line x1="44" y1="34" x2="31" y2="27"/><line x1="17" y1="21" x2="4" y2="14"/></svg>
+        <div class="svc-name">KUBERNETES<br/>&amp; CONTAINERS</div>
+        <p class="svc-desc">Cluster design, Helm charts, GitOps with ArgoCD/Flux, autoscaling, service meshes. We run clusters that don't page you at 3 AM.</p>
+        <div class="svc-tags"><span class="tag">K8s</span><span class="tag">Helm</span><span class="tag">ArgoCD</span><span class="tag">Istio</span><span class="tag">GitOps</span></div>
+      </div>
+
+      <div class="svc-card cc-data fade-up d2" style="grid-column: 2;">
+        <div class="svc-num">07</div>
+        <svg class="svc-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="40" height="40" rx="2"/><polyline points="10,34 18,22 26,28 34,14 42,18"/><circle cx="10" cy="34" r="2" fill="currentColor"/><circle cx="18" cy="22" r="2" fill="currentColor"/><circle cx="26" cy="28" r="2" fill="currentColor"/><circle cx="34" cy="14" r="2" fill="currentColor"/></svg>
+        <div class="svc-name">DATA<br/>SCIENCE</div>
+        <p class="svc-desc">End-to-end data pipelines, ETL, statistical models, forecasting, and dashboards. We turn raw numbers into decisions that move the needle.</p>
+        <div class="svc-tags"><span class="tag">Pandas</span><span class="tag">SQL</span><span class="tag">Spark</span><span class="tag">Forecasting</span><span class="tag">ETL</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PRICING ════════════════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-label fade-up">Subscription Plans</div>
+    <h2 class="section-title fade-up d1">PICK YOUR<br/>PLAN</h2>
+    <div class="price-grid">
+
+      <div class="plan fade-up d1">
+        <div class="plan-name">STARTER</div>
+        <div class="plan-price"><span class="plan-curr">$</span><span class="plan-amt">49</span><span class="plan-per">/mo</span></div>
+        <div class="plan-sub">For individuals getting serious about tech.</div>
+        <ul class="plan-feats">
+          <li>50 AI consultations / month</li>
+          <li>4 core domains (Cyber, Python, Linux, Web)</li>
+          <li>Response within 2 hours</li>
+          <li>Email support</li>
+          <li class="off">AI / ML domain</li>
+          <li class="off">Kubernetes domain</li>
+          <li class="off">Data Science domain</li>
+          <li class="off">Strategy calls</li>
+        </ul>
+        <button class="plan-btn outline" onclick="openModal('starter')">Get Started →</button>
+      </div>
+
+      <div class="plan featured fade-up d2">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">PRO</div>
+        <div class="plan-price"><span class="plan-curr">$</span><span class="plan-amt">149</span><span class="plan-per">/mo</span></div>
+        <div class="plan-sub">For teams that ship real products at speed.</div>
+        <ul class="plan-feats">
+          <li>Unlimited AI consultations</li>
+          <li>All 7 domains unlocked</li>
+          <li>Priority response &lt; 30 min</li>
+          <li>Email + Slack support</li>
+          <li>AI / ML domain</li>
+          <li>Kubernetes domain</li>
+          <li>Data Science domain</li>
+          <li>Monthly strategy call</li>
+        </ul>
+        <button class="plan-btn solid" onclick="openModal('pro')">Subscribe to Pro →</button>
+      </div>
+
+      <div class="plan fade-up d3">
+        <div class="plan-name">ELITE</div>
+        <div class="plan-price"><span class="plan-curr">$</span><span class="plan-amt">499</span><span class="plan-per">/mo</span></div>
+        <div class="plan-sub">For organizations where downtime costs real money.</div>
+        <ul class="plan-feats">
+          <li>Unlimited AI consultations</li>
+          <li>All 7 domains unlocked</li>
+          <li>Immediate priority response</li>
+          <li>Dedicated async expert review</li>
+          <li>Architecture review sessions</li>
+          <li>Weekly strategy calls</li>
+          <li>Direct engineer access</li>
+          <li>Custom onboarding</li>
+        </ul>
+        <button class="plan-btn outline" onclick="openModal('elite')">Go Elite →</button>
+      </div>
+
+    </div>
+    <div class="pricing-foot fade-up">
+      <button class="btn-ghost" style="font-size:0.68rem;padding:0.6rem 1.4rem;" onclick="openStatusModal()">
+        Check Existing Subscription
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PHILOSOPHY ════════════════════ -->
+<section class="philosophy" id="philosophy">
+  <div class="container">
+    <div class="phil-grid">
+      <div class="fade-up">
+        <div class="section-label" style="margin-bottom:2rem;">Our Approach</div>
+        <blockquote class="phil-quote">
+          "The best part<br/>is <em>no part</em>.<br/>The best process<br/>is <em>no process</em>."
+        </blockquote>
+        <div class="phil-attr">— First Principles Thinking</div>
+      </div>
+      <div class="phil-body fade-up d2">
+        <p>Most consultancies sell <strong>methodology frameworks</strong>. We sell <strong>outcomes</strong>. We walk in, understand your actual problem — not the problem you think you have — and deliver the most direct solution to it.</p>
+        <p>Our AI consultant doesn't hedge. It doesn't say "it depends" and leave you to figure the rest out. It gives you the answer, the code, the config, and the reasoning behind it.</p>
+        <p>We operate in <strong>seven domains</strong> because those seven domains cover 95% of what most organizations actually struggle with. Depth over breadth. Always.</p>
+        <p><strong>Brutal clarity</strong> is a feature, not a bug.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ CONSULT ════════════════════ -->
+<section class="consult-section" id="consult">
+  <div class="container">
+    <div class="consult-wrap">
+
+      <div class="fade-up">
+        <div class="section-label">AI Consultant</div>
+        <h2 class="section-title">ASK THE<br/>ENGINE</h2>
+        <p class="consult-desc">Powered by Claude — the AI that knows its stuff. Ask anything within our seven domains. Get direct, expert-level answers with real code, real commands, and zero padding.</p>
+        <div class="dom-pills">
+          <div class="dom-pill" style="--pc:#ff2d55"><span class="pip"></span>Cybersecurity</div>
+          <div class="dom-pill" style="--pc:#00e5ff"><span class="pip"></span>Python Engineering</div>
+          <div class="dom-pill" style="--pc:#ff6b00"><span class="pip"></span>Linux Systems</div>
+          <div class="dom-pill" style="--pc:#00ff88"><span class="pip"></span>Web Development</div>
+          <div class="dom-pill" style="--pc:#bf5fff"><span class="pip"></span>Artificial Intelligence</div>
+          <div class="dom-pill" style="--pc:#326ce5"><span class="pip"></span>Kubernetes &amp; Containers</div>
+          <div class="dom-pill" style="--pc:#ffcc00"><span class="pip"></span>Data Science</div>
+        </div>
+      </div>
+
+      <div class="fade-up d2">
+        <div class="chat-widget">
+          <div class="chat-head">
+            <div class="chat-head-l">
+              <div class="chat-dot"></div>
+              <span class="chat-title-lbl">SCHWAK-IT · AI Consultant</span>
+            </div>
+            <span class="chat-badge">Claude-Powered</span>
+          </div>
+
+          <div class="chat-msgs" id="chatMsgs">
+            <div class="msg assistant">
+              <div class="msg-lbl">SCHWAK-IT Consultant</div>
+              <div class="msg-bub">
+                First principles: What's your problem?<br/><br/>
+                I consult in <strong>Cybersecurity</strong>, <strong>Python</strong>, <strong>Linux</strong>,
+                <strong>Web Dev</strong>, <strong>AI/ML</strong>, <strong>Kubernetes</strong>, and
+                <strong>Data Science</strong>. Ask me anything — direct answers, real code, zero filler.
+              </div>
+            </div>
+          </div>
+
+          <div class="sugg-qs" id="suggQs">
+            <button class="sq" onclick="fillQ(this.textContent)">Harden SSH on Ubuntu?</button>
+            <button class="sq" onclick="fillQ(this.textContent)">Best Python async API pattern?</button>
+            <button class="sq" onclick="fillQ(this.textContent)">Set up a RAG pipeline?</button>
+            <button class="sq" onclick="fillQ(this.textContent)">Debug CrashLoopBackOff in K8s?</button>
+            <button class="sq" onclick="fillQ(this.textContent)">Build a time-series forecast?</button>
+          </div>
+
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask your question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="chat-send" id="chatSend" onclick="sendMessage()">Send →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ FOOTER ════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <span class="footer-logo">SCHWAK-IT</span>
+        <p class="footer-tag">Elite tech consulting in Cybersecurity, Python, Linux, Web Development, AI/ML, Kubernetes, and Data Science. We don't consult. We solve.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a href="#services">Cybersecurity</a>
+        <a href="#services">Python</a>
+        <a href="#services">Linux</a>
+        <a href="#services">Web Dev</a>
+        <a href="#services">AI / ML</a>
+        <a href="#services">Kubernetes</a>
+        <a href="#services">Data Science</a>
+      </div>
+      <div class="footer-col">
+        <h4>Plans</h4>
+        <a href="#pricing">Starter — $49</a>
+        <a href="#pricing">Pro — $149</a>
+        <a href="#pricing">Elite — $499</a>
+      </div>
+      <div class="footer-col">
+        <h4>Stack</h4>
+        <a href="#">AWS Serverless</a>
+        <a href="#">Claude API</a>
+        <a href="#">Python 3.12</a>
+        <a href="#">DynamoDB + SES</a>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <div class="footer-copy">© 2024 SCHWAK-IT CONSULTANCY. All rights reserved.</div>
+      <div class="footer-powered">Powered by <span>Claude</span> · Deployed on <span>AWS</span></div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════ SUBSCRIBE MODAL ════════════════════ -->
+<div class="overlay" id="subModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-plan-name" id="mPlanName">SUBSCRIBE</div>
+        <span class="modal-plan-badge" id="mPlanBadge">PRO · $149/MO</span>
+      </div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="mBody">
+      <div class="modal-summary">
+        Plan: <strong id="mSumPlan">Pro</strong> ·
+        Price: <strong id="mSumPrice">$149/month</strong> ·
+        Consultations: <strong id="mSumQ">Unlimited</strong>
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="subName">Full Name</label>
+        <input class="finput" id="subName" type="text" placeholder="Charles-Wesley Mensah" />
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="subEmail">Work Email</label>
+        <input class="finput" id="subEmail" type="email" placeholder="you@company.com" />
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="subCo">Company (optional)</label>
+        <input class="finput" id="subCo" type="text" placeholder="Acme Corp" />
+      </div>
+      <div class="modal-err" id="subErr"></div>
+      <button class="modal-submit" id="subBtn" onclick="submitSub()">Activate Subscription →</button>
+      <div class="modal-note">No payment collected here — our team contacts you within 1 business hour to complete setup. Cancel any time.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ STATUS MODAL ════════════════════ -->
+<div class="overlay" id="statusModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-plan-name">MY SUBSCRIPTION</div>
+      <button class="modal-x" onclick="closeStatusModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup">
+        <label class="flabel" for="stEmail">Your Email</label>
+        <input class="finput" id="stEmail" type="email" placeholder="you@company.com" />
+      </div>
+      <div class="modal-err" id="stErr"></div>
+      <div id="stResult" style="display:none; margin-bottom:1rem;">
+        <div class="modal-summary">
+          Plan: <strong id="stPlan"></strong><br/>
+          Status: <strong id="stStatus"></strong><br/>
+          Consultations used this month: <strong id="stUsed"></strong><br/>
+          Member since: <strong id="stSince"></strong>
+        </div>
+        <button class="plan-btn outline" id="stManageBtn" style="margin-top:0.9rem;">Manage Billing →</button>
+      </div>
+      <button class="modal-submit" id="stBtn" onclick="checkStatus()">Check Status →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '__API_ENDPOINT__';
+
+document.addEventListener('mousemove', e => {
+  const cg = document.getElementById('cg');
+  cg.style.left = e.clientX + 'px';
+  cg.style.top  = e.clientY + 'px';
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+let chatHistory = [];
+let loading = false;
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function fillQ(q) {
+  document.getElementById('chatInput').value = q;
+  document.getElementById('suggQs').style.display = 'none';
+  document.getElementById('chatInput').focus();
+}
+
+function appendMsg(role, content, domain) {
+  const c = document.getElementById('chatMsgs');
+  const m = document.createElement('div');
+  m.className = 'msg ' + role;
+  const lbl = document.createElement('div');
+  lbl.className = 'msg-lbl';
+  lbl.textContent = role === 'user' ? 'You' : 'SCHWAK-IT Consultant';
+  const bub = document.createElement('div');
+  bub.className = 'msg-bub';
+  if (role === 'assistant') {
+    bub.innerHTML = mdToHtml(content);
+    if (domain && domain !== 'general') {
+      const d = document.createElement('div');
+      d.className = 'msg-dom';
+      d.textContent = '↳ ' + domain.toUpperCase() + ' DOMAIN';
+      m.appendChild(lbl); m.appendChild(bub); m.appendChild(d);
+      c.appendChild(m); c.scrollTop = c.scrollHeight; return;
+    }
+  } else {
+    bub.textContent = content;
+  }
+  m.appendChild(lbl); m.appendChild(bub);
+  c.appendChild(m); c.scrollTop = c.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('chatMsgs');
+  const t = document.createElement('div');
+  t.className = 'msg assistant'; t.id = 'typingEl';
+  const lbl = document.createElement('div'); lbl.className = 'msg-lbl'; lbl.textContent = 'SCHWAK-IT Consultant';
+  const dots = document.createElement('div'); dots.className = 'typing-dots';
+  dots.innerHTML = '<div class="td"></div><div class="td"></div><div class="td"></div>';
+  t.appendChild(lbl); t.appendChild(dots);
+  c.appendChild(t); c.scrollTop = c.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingEl');
+  if (el) el.remove();
+}
+
+function mdToHtml(text) {
+  return text
+    .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/^#{1,3} (.+)$/gm, '<strong>$1</strong>')
+    .replace(/^[-*] (.+)$/gm, '• $1')
+    .replace(/^\d+\. (.+)$/gm, '→ $1')
+    .replace(/\n/g, '<br/>');
+}
+
+async function sendMessage() {
+  if (loading) return;
+  const input = document.getElementById('chatInput');
+  const send  = document.getElementById('chatSend');
+  const msg   = input.value.trim();
+  if (!msg) return;
+
+  document.getElementById('suggQs').style.display = 'none';
+  appendMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  input.value = ''; input.style.height = 'auto';
+  loading = true; send.disabled = true; send.textContent = '...';
+  showTyping();
+
+  try {
+    const res  = await fetch(API + '/consult', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg, history: chatHistory.slice(0, -1) }) });
+    const data = await res.json();
+    hideTyping();
+    if (!res.ok) {
+      appendMsg('assistant', '⚠ ' + (data.error || 'Something went wrong. Try again.'), null);
+    } else {
+      appendMsg('assistant', data.reply, data.domain_hint);
+      chatHistory.push({ role: 'assistant', content: data.reply });
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+    }
+  } catch {
+    hideTyping();
+    appendMsg('assistant', "Connection error. Check your network and retry. The engine doesn't fail — networks do.", null);
+  } finally {
+    loading = false; send.disabled = false; send.textContent = 'Send →';
+    input.focus();
+  }
+}
+
+const PLANS = {
+  starter: { label: 'STARTER', badge: 'STARTER · $49/MO', name: 'Starter', price: '$49/month', consults: '50/month' },
+  pro:     { label: 'PRO',     badge: 'PRO · $149/MO',    name: 'Pro',     price: '$149/month', consults: 'Unlimited' },
+  elite:   { label: 'ELITE',   badge: 'ELITE · $499/MO',  name: 'Elite',   price: '$499/month', consults: 'Unlimited' },
+};
+let activePlan = 'pro';
+
+function openModal(plan) {
+  activePlan = plan;
+  const p = PLANS[plan];
+  document.getElementById('mPlanName').textContent  = p.label;
+  document.getElementById('mPlanBadge').textContent = p.badge;
+  document.getElementById('mSumPlan').textContent   = p.name;
+  document.getElementById('mSumPrice').textContent  = p.price;
+  document.getElementById('mSumQ').textContent      = p.consults;
+  document.getElementById('subErr').style.display   = 'none';
+  document.getElementById('subName').value  = '';
+  document.getElementById('subEmail').value = '';
+  document.getElementById('subCo').value    = '';
+  document.getElementById('subModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('subModal').classList.remove('open'); }
+
+function openStatusModal() {
+  document.getElementById('stEmail').value = '';
+  document.getElementById('stErr').style.display = 'none';
+  document.getElementById('stResult').style.display = 'none';
+  document.getElementById('statusModal').classList.add('open');
+}
+
+function closeStatusModal() { document.getElementById('statusModal').classList.remove('open'); }
+
+document.getElementById('subModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('statusModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeStatusModal(); });
+
+async function submitSub() {
+  const name  = document.getElementById('subName').value.trim();
+  const email = document.getElementById('subEmail').value.trim();
+  const co    = document.getElementById('subCo').value.trim();
+  const err   = document.getElementById('subErr');
+  const btn   = document.getElementById('subBtn');
+
+  err.style.display = 'none';
+  if (!name)  { err.textContent = 'Name is required.';  err.style.display = 'block'; return; }
+  if (!email) { err.textContent = 'Email is required.'; err.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Redirecting to checkout...';
+
+  try {
+    const res  = await fetch(API + '/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, company: co, plan: activePlan }) });
+    const data = await res.json();
+    if (!res.ok) {
+      err.textContent = data.error || 'Something went wrong. Try again.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Activate Subscription →';
+    } else if (data.checkout_url) {
+      // Hand off to Stripe's hosted, PCI-compliant checkout page.
+      window.location.href = data.checkout_url;
+    } else {
+      err.textContent = 'Could not start checkout. Please try again.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Activate Subscription →';
+    }
+  } catch {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Activate Subscription →';
+  }
+}
+
+// ── Stripe redirect handling (checkout success/cancel, billing portal return) ─
+function handleCheckoutRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get('checkout');
+  const plan = params.get('plan');
+
+  if (checkout === 'success') {
+    const planName = PLANS[plan]?.name || 'your';
+    openModal(plan && PLANS[plan] ? plan : 'pro');
+    document.getElementById('mBody').innerHTML = `
+      <div class="modal-success">
+        <div class="modal-success-icon">⚡</div>
+        <h3>PAYMENT CONFIRMED</h3>
+        <p>You're on the <strong>${planName}</strong> plan.<br/><br/>
+        Check your inbox for confirmation — it lands within a minute or two.<br/><br/>
+        <em style="color:var(--text3);font-size:0.8rem;">We don't consult. We solve.</em></p>
+        <button class="plan-btn solid" style="margin-top:1.5rem;" onclick="closeModal()">Start Consulting →</button>
+      </div>`;
+  } else if (checkout === 'cancelled') {
+    openStatusModal();
+    document.getElementById('stErr').textContent = 'Checkout was cancelled — no charge was made. Try again any time.';
+    document.getElementById('stErr').style.display = 'block';
+  }
+
+  // Clean the URL so a refresh doesn't re-trigger the modal
+  if (checkout) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+window.addEventListener('DOMContentLoaded', handleCheckoutRedirect);
+
+// ── Billing portal (manage / cancel existing subscription) ───────────────────
+async function openBillingPortal(email) {
+  try {
+    const res  = await fetch(API + '/subscribe/portal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+    const data = await res.json();
+    if (res.ok && data.portal_url) {
+      window.location.href = data.portal_url;
+    } else {
+      const err = document.getElementById('stErr');
+      err.textContent = data.error || 'Could not open billing portal.';
+      err.style.display = 'block';
+    }
+  } catch {
+    const err = document.getElementById('stErr');
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+  }
+}
+
+async function checkStatus() {
+  const email = document.getElementById('stEmail').value.trim();
+  const err   = document.getElementById('stErr');
+  const btn   = document.getElementById('stBtn');
+  const res_el = document.getElementById('stResult');
+
+  err.style.display = 'none'; res_el.style.display = 'none';
+  if (!email) { err.textContent = 'Email is required.'; err.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Looking up...';
+
+  try {
+    const res  = await fetch(API + '/subscribe?email=' + encodeURIComponent(email));
+    const data = await res.json();
+    if (!res.ok) {
+      err.textContent = data.error || 'Subscription not found.';
+      err.style.display = 'block';
+    } else {
+      const s = data.subscription;
+      document.getElementById('stPlan').textContent   = (s.plan || '').toUpperCase();
+      document.getElementById('stStatus').textContent = s.status || '—';
+      document.getElementById('stUsed').textContent   = s.consultations_used_this_month ?? 0;
+      document.getElementById('stSince').textContent  = s.created_at ? new Date(s.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '—';
+      res_el.style.display = 'block';
+
+      // Wire up a manage-billing action once we know the email is real
+      const manageBtn = document.getElementById('stManageBtn');
+      if (manageBtn) manageBtn.onclick = () => openBillingPortal(email);
+    }
+  } catch {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Check Status →';
+  }
+
+}
+</script>
+
+</body>
+</html>

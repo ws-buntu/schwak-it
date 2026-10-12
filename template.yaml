@@ -1,0 +1,596 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SCHWAK-IT CONSULTANCY — AI-Powered Tech Consulting Platform
+  Powered by Claude AI | Cybersecurity · Python · Linux · Web Dev · AI/ML · Kubernetes · Data Science
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Runtime: python3.12
+
+Parameters:
+  AnthropicApiKeyParam:
+    Type: String
+    Default: /schwak-it/anthropic-api-key
+    Description: SSM Parameter path for the Anthropic API key
+
+  StripeSecretKeyParam:
+    Type: String
+    Default: /schwak-it/stripe-secret-key
+    Description: SSM Parameter path for the Stripe secret key (sk_live_... or sk_test_...)
+
+  StripeWebhookSecretParam:
+    Type: String
+    Default: /schwak-it/stripe-webhook-secret
+    Description: SSM Parameter path for the Stripe webhook signing secret (whsec_...)
+
+  StripePriceStarter:
+    Type: String
+    Default: "REPLACE_WITH_STARTER_PRICE_ID"
+    Description: Stripe Price ID for the Starter plan ($49/mo) — from Stripe Dashboard > Products
+
+  StripePricePro:
+    Type: String
+    Default: "REPLACE_WITH_PRO_PRICE_ID"
+    Description: Stripe Price ID for the Pro plan ($149/mo)
+
+  StripePriceElite:
+    Type: String
+    Default: "REPLACE_WITH_ELITE_PRICE_ID"
+    Description: Stripe Price ID for the Elite plan ($499/mo)
+
+  SenderEmail:
+    Type: String
+    Default: noreply@schwak-it.com
+    Description: Verified SES sender address for subscription emails
+
+  AdminNotificationEmail:
+    Type: String
+    Default: admin@schwak-it.com
+    Description: Where SES bounce/complaint notifications are sent (confirm the SNS subscription email after deploy)
+
+  SendingDomain:
+    Type: String
+    Default: schwak-it.com
+    Description: Domain to verify with SES for sending (Easy DKIM). Must match SenderEmail's domain.
+
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment
+
+Resources:
+
+  # ─────────────────────────────────────────────
+  # S3 — Static Website Bucket
+  # ─────────────────────────────────────────────
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "schwak-it-frontend-${AWS::AccountId}-${Environment}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Project
+          Value: SCHWAK-IT
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontOAC
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+  # ─────────────────────────────────────────────
+  # CloudFront — CDN + OAC
+  # ─────────────────────────────────────────────
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "schwak-it-oac-${Environment}"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: SCHWAK-IT CONSULTANCY Frontend
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt CloudFrontOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # CORS-S3Origin
+          Compress: true
+          AllowedMethods: [GET, HEAD, OPTIONS]
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        Tags:
+          - Key: Project
+            Value: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # SSM — Anthropic API Key (set value manually after deploy)
+  # ─────────────────────────────────────────────
+  AnthropicApiKeySsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref AnthropicApiKeyParam
+      Type: String
+      Value: "REPLACE_WITH_YOUR_ANTHROPIC_API_KEY"
+      Description: Anthropic API Key for SCHWAK-IT Claude integration
+      Tags:
+        Project: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # SSM — Stripe Secrets (set values manually after deploy)
+  # ─────────────────────────────────────────────
+  StripeSecretKeySsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref StripeSecretKeyParam
+      Type: String
+      Value: "REPLACE_WITH_YOUR_STRIPE_SECRET_KEY"
+      Description: Stripe secret key for SCHWAK-IT Checkout & Billing Portal
+      Tags:
+        Project: SCHWAK-IT
+
+  StripeWebhookSecretSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref StripeWebhookSecretParam
+      Type: String
+      Value: "REPLACE_WITH_YOUR_STRIPE_WEBHOOK_SIGNING_SECRET"
+      Description: Stripe webhook signing secret (whsec_...) for verifying incoming events
+      Tags:
+        Project: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # SES — Domain Identity + DKIM (required for production sending access)
+  # ─────────────────────────────────────────────
+  SESDomainIdentity:
+    Type: AWS::SES::EmailIdentity
+    Properties:
+      EmailIdentity: !Ref SendingDomain
+      DkimSigningAttributes:
+        NextSigningKeyLength: RSA_2048_BIT
+
+  # ─────────────────────────────────────────────
+  # SES — Configuration Set + bounce/complaint tracking
+  # (AWS reviews this when you request production access)
+  # ─────────────────────────────────────────────
+  SESConfigurationSet:
+    Type: AWS::SES::ConfigurationSet
+    Properties:
+      Name: !Sub "schwak-it-${Environment}"
+      ReputationOptions:
+        ReputationMetricsEnabled: true
+      SendingOptions:
+        SendingEnabled: true
+
+  SESBounceComplaintTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "schwak-it-ses-events-${Environment}"
+      Tags:
+        - Key: Project
+          Value: SCHWAK-IT
+
+  SESBounceComplaintSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SESBounceComplaintTopic
+      Protocol: email
+      Endpoint: !Ref AdminNotificationEmail
+
+  SESConfigurationSetEventDestination:
+    Type: AWS::SES::ConfigurationSetEventDestination
+    Properties:
+      ConfigurationSetName: !Ref SESConfigurationSet
+      EventDestination:
+        Name: bounce-complaint-tracking
+        Enabled: true
+        MatchingEventTypes:
+          - bounce
+          - complaint
+          - reject
+        SnsDestination:
+          TopicArn: !Ref SESBounceComplaintTopic
+
+  # ─────────────────────────────────────────────
+  # DynamoDB — Subscribers Table
+  # ─────────────────────────────────────────────
+  SubscribersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "schwak-it-subscribers-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # IAM — Lambda Execution Role (Consult)
+  # ─────────────────────────────────────────────
+  ConsultLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "schwak-it-consult-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SSMReadPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/schwak-it/*"
+
+  # ─────────────────────────────────────────────
+  # IAM — Lambda Execution Role (Subscribe)
+  # ─────────────────────────────────────────────
+  SubscribeLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "schwak-it-subscribe-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                Resource: !GetAtt SubscribersTable.Arn
+        - PolicyName: SSMReadPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/schwak-it/*"
+
+  # ─────────────────────────────────────────────
+  # IAM — Lambda Execution Role (Stripe Webhook)
+  # ─────────────────────────────────────────────
+  StripeWebhookLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "schwak-it-stripe-webhook-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Scan
+                Resource: !GetAtt SubscribersTable.Arn
+        - PolicyName: SSMReadPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/schwak-it/*"
+        - PolicyName: SESSendPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: "*"
+
+  # ─────────────────────────────────────────────
+  # Lambda — AI Consultation Engine
+  # ─────────────────────────────────────────────
+  ConsultFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "schwak-it-consult-${Environment}"
+      CodeUri: src/
+      Handler: handler.lambda_handler
+      Role: !GetAtt ConsultLambdaRole.Arn
+      Description: "SCHWAK-IT AI Consultant powered by Claude"
+      Layers:
+        - !Ref DependenciesLayer
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY_PARAM: !Ref AnthropicApiKeyParam
+      Events:
+        ConsultApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /consult
+            Method: POST
+        HealthApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /health
+            Method: GET
+      Tags:
+        Project: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # Lambda — Subscription Management
+  # ─────────────────────────────────────────────
+  SubscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "schwak-it-subscribe-${Environment}"
+      CodeUri: src/
+      Handler: subscribe.lambda_handler
+      Role: !GetAtt SubscribeLambdaRole.Arn
+      Description: "SCHWAK-IT Subscription Management (Stripe Checkout + Billing Portal)"
+      Layers:
+        - !Ref DependenciesLayer
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+          SITE_URL: !Sub "https://${CloudFrontDistribution.DomainName}"
+          STRIPE_SECRET_KEY_PARAM: !Ref StripeSecretKeyParam
+          STRIPE_PRICE_STARTER: !Ref StripePriceStarter
+          STRIPE_PRICE_PRO: !Ref StripePricePro
+          STRIPE_PRICE_ELITE: !Ref StripePriceElite
+      Events:
+        SubscribeCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /subscribe
+            Method: POST
+        SubscribeGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /subscribe
+            Method: GET
+        SubscribePlans:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /subscribe/plans
+            Method: GET
+        SubscribePortal:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /subscribe/portal
+            Method: POST
+        SubscribeDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /subscribe
+            Method: DELETE
+      Tags:
+        Project: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # Lambda — Stripe Webhook Handler
+  # ─────────────────────────────────────────────
+  StripeWebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "schwak-it-stripe-webhook-${Environment}"
+      CodeUri: src/
+      Handler: stripe_webhook.lambda_handler
+      Role: !GetAtt StripeWebhookLambdaRole.Arn
+      Description: "SCHWAK-IT Stripe Webhook — syncs payment state into DynamoDB, sends emails"
+      Layers:
+        - !Ref DependenciesLayer
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+          SENDER_EMAIL: !Ref SenderEmail
+          SITE_URL: !Sub "https://${CloudFrontDistribution.DomainName}"
+          STRIPE_SECRET_KEY_PARAM: !Ref StripeSecretKeyParam
+          STRIPE_WEBHOOK_SECRET_PARAM: !Ref StripeWebhookSecretParam
+          STRIPE_PRICE_STARTER: !Ref StripePriceStarter
+          STRIPE_PRICE_PRO: !Ref StripePricePro
+          STRIPE_PRICE_ELITE: !Ref StripePriceElite
+      Events:
+        StripeWebhookApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConsultApi
+            Path: /webhook/stripe
+            Method: POST
+      Tags:
+        Project: SCHWAK-IT
+
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "schwak-it-deps-${Environment}"
+      Description: Python dependencies for SCHWAK-IT (anthropic SDK)
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - python3.12
+      RetentionPolicy: Retain
+
+  # ─────────────────────────────────────────────
+  # API Gateway
+  # ─────────────────────────────────────────────
+  ConsultApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "schwak-it-api-${Environment}"
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'POST,GET,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+      Tags:
+        Project: SCHWAK-IT
+
+  # ─────────────────────────────────────────────
+  # CloudWatch — Log Groups
+  # ─────────────────────────────────────────────
+  ConsultFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/schwak-it-consult-${Environment}"
+      RetentionInDays: 30
+
+  SubscribeFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/schwak-it-subscribe-${Environment}"
+      RetentionInDays: 30
+
+  StripeWebhookFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/schwak-it-stripe-webhook-${Environment}"
+      RetentionInDays: 30
+
+# ─────────────────────────────────────────────
+# Outputs
+# ─────────────────────────────────────────────
+Outputs:
+  ApiEndpoint:
+    Description: "SCHWAK-IT API Gateway endpoint"
+    Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+    Export:
+      Name: !Sub "schwak-it-api-endpoint-${Environment}"
+
+  CloudFrontURL:
+    Description: "SCHWAK-IT Website URL"
+    Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+    Export:
+      Name: !Sub "schwak-it-cloudfront-url-${Environment}"
+
+  FrontendBucketName:
+    Description: "S3 bucket for frontend assets"
+    Value: !Ref FrontendBucket
+    Export:
+      Name: !Sub "schwak-it-frontend-bucket-${Environment}"
+
+  CloudFrontDistributionId:
+    Description: "CloudFront Distribution ID (for cache invalidation)"
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub "schwak-it-cf-distribution-id-${Environment}"
+
+  SubscribersTableName:
+    Description: "DynamoDB table storing subscriber records"
+    Value: !Ref SubscribersTable
+    Export:
+      Name: !Sub "schwak-it-subscribers-table-${Environment}"
+
+  StripeWebhookEndpoint:
+    Description: "Paste this URL into Stripe Dashboard > Developers > Webhooks"
+    Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/webhook/stripe"
+    Export:
+      Name: !Sub "schwak-it-stripe-webhook-endpoint-${Environment}"
+
+  SESDkimToken1:
+    Description: "DNS record 1 of 3 — add as CNAME at your DNS provider (see PRODUCTION_ACCESS.md)"
+    Value: !Sub "${SESDomainIdentity.DkimDNSTokenName1} -> ${SESDomainIdentity.DkimDNSTokenValue1}"
+
+  SESDkimToken2:
+    Description: "DNS record 2 of 3 — add as CNAME at your DNS provider"
+    Value: !Sub "${SESDomainIdentity.DkimDNSTokenName2} -> ${SESDomainIdentity.DkimDNSTokenValue2}"
+
+  SESDkimToken3:
+    Description: "DNS record 3 of 3 — add as CNAME at your DNS provider"
+    Value: !Sub "${SESDomainIdentity.DkimDNSTokenName3} -> ${SESDomainIdentity.DkimDNSTokenValue3}"
